@@ -1,0 +1,172 @@
+﻿@{
+    ViewData["Title"] = "Agreements Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Agreements Details</h1>
+<button class="btn-primary" style="margin:10px" onclick="PopupForm('@Url.Action("AddOrEditAgreements","Agreements")')">Add New</button>
+@*<button class="btn-primary" style="margin:10px" onclick="ShowModelPopUp();">Add New</button>*@
+@*<div id="showmodal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
+    <div class="modal-dialog" role="document">
+    <div class="modal-content">
+    @{
+    Html.RenderPartial("AddOrEditAgreements.cshtml");
+    }
+    </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+    <button id='open' data-toggle="modal" data-target="#showmodal">open modal</button>*@
+
+
+<table id="productId" class="table table-striped table-bordered" style="width:100%">
+    <thead>
+        <tr>
+            <th>User Name</th>
+            <th>Product Group Code</th>
+            <th>Product Number</th>
+            <th>Effective Date</th>
+            <th>Expiration Date</th>
+            <th>Product Price</th>
+            <th>New Price</th>
+            <th></th>
+            <th></th>
+        </tr>
+    </thead>
+</table>
+
+@*<link href="//cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js" rel="stylesheet"/>*@
+@*<link href ="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap.min.css" />*@
+<link href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+
+@section productScripts{
+<script src="//cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap.min.js"></script>
+@*<script>
+    $(Document).ready(function(){
+    $("#productId").DataTable({
+    "ajax":{
+    "url":"/api/agreements",
+    "type":"GET",
+    "datatype":"json"
+    },
+    "columns":[
+    {"data":"UserName"},
+    {"data":"Product Group Code"},
+    {"data":"Product Number"},
+    {"data":"Effective Date"},
+    {"data":"Expiration Date"},
+    {"data":"Product Price"},
+    {"data":"New Price"}
+    ]
+
+    });
+    });
+    </script>*@
+<script>
+        $(document).ready(function () {
+            var Popup, datatable;
+            bindDatatable();
+        });
+            ShowModelPopUp = function () {
+            window.showModalDialog('/Agreements/AddOrEditAgreements', "WindowPopup", 'width=400px,height=400px');
+    }
+        function bindDatatable() {
+            datatable = $('#productId')
+                .DataTable({
+                    "sAjaxSource": "/api/agreements",
+                    "bServerSide": true,
+                    "bProcessing": true,
+                    "bSearchable": true,
+                    "order": [[1, 'asc']],
+                    "language": {
+                        "emptyTable": "No record click on add new to add new records.",
+                        "processing":
+                            '<i class="fa fa-spinner fa-spin fa-3x fa-fw" style="color:#2a2b2b;"></i><span class="sr-only">Loading...</span> '
+                    },
+                    "columns": [
+                        {
+                            "data": "userName",
+                            "autoWidth": true,
+                            "searchable": true
+                        },
+                        {
+                            "data": "productGroupCode",
+                            "autoWidth": true,
+                            "searchable": true
+                        },
+                        {
+                            "data": "productNumber",
+                            "autoWidth": true,
+                            "searchable": true
+                        },
+                        {
+                            "data": "effectiveDate",
+                            "autoWidth": true,
+                            "searchable": true
+                        }, {
+                            "data": "expirationDate",
+                            "autoWidth": true,
+                            "searchable": true
+                        }, {
+                            "data": "productPrice",
+                            "autoWidth": true,
+                            "searchable": true
+                        },
+                        {
+                            "data": "newPrice",
+                            "autoWidth": true,
+                            "searchable": true
+                        },
+                        {
+                            "data":"id",
+                            "render":function(data){
+                                return "<a class='btn btn-default btn-sm' onclick=PopupForm('@Url.Action("AddOrEditAgreements","Agreements")/"+ data +"')>Edit</a>"
+                            }
+                        },{
+                            "data":"id",
+                            "render":function(data){
+                                return "<a class='btn btn-default btn-sm' onclick=DeleteAgreement("+data+")>Delete</a>"
+                            }
+                        }
+
+                    ]
+                });
+        }
+
+        function DeleteAgreement(id){
+             $.ajax({
+                    url: '/api/agreements/' + id,
+                    type: 'DELETE',
+                    dataType: 'json',
+                     success: function (d) {
+                     datatable.ajax.reload();
+                     },
+                    error: function () {
+                        alert('Error!');
+                    }
+                });
+        }
+                    function  PopupForm(url)
+                    {
+                    var formDiv = $('<div/>');
+                    $.get(url)
+                    .done(function(response){
+                        formDiv.html(response);
+                    Popup = formDiv.dialog({
+                        autoWidth: true,
+                        resizable:false,
+                        title:'Agreements Details',
+                        height:700,
+                        width: 800,
+                        close: function(){
+                            alert('close');
+                            Popup.dialog('close').remove();
+                        }
+                    });
+                    });
+                }
+
+                
+</script>
+}

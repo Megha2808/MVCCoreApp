@@ -1,0 +1,129 @@
+﻿@model TestMVC.DomainModels.ApplicationClasses.AgreementAc
+
+@{
+    Layout = null;
+}
+
+@using (Html.BeginForm("AddOrEdit", "Agreements", FormMethod.Post, new { enctype = "multipart/form-data", onsubmit = "retur SubmitForm(event)" }))
+{
+    @Html.HiddenFor(model => model.Id)
+
+    <div class="form-group">
+        <label class="col-md-4 control-label">Group</label>
+        <div class="col-md-6">
+            <select class="form-control" value="@Model.ProductGroupId" name="@Html.NameFor(model => model.ProductGroupId)" id="ddlGroup">
+            </select><br />
+            @Html.ValidationMessageFor(model=>model.ProductGroupId)
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="col-md-4 control-label">Product</label>
+        <div class="col-md-6">
+            <select name="@Html.NameFor(model => model.ProductId)" value="@Model.ProductId" class="form-control" id="ddlProduct"></select>
+            @Html.ValidationMessageFor(model=>model.ProductId)
+            <br />
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.EffectiveDate, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.EffectiveDate, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(model => model.EffectiveDate, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.ExpirationDate, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.ExpirationDate, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(model => model.ExpirationDate, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.NewPrice, htmlAttributes: new { @class = "control-label" })
+        <div class="input-group">
+            @Html.EditorFor(model => model.NewPrice, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(model=>model.NewPrice)
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.IsActive, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.CheckBoxFor(model => model.IsActive, new { htmlAttributes = new { @class = "form-control" } })
+        </div>
+    </div>
+
+    <div class="form-group">
+        <input type="submit" value="Submit" class="btn btn-primary" />
+        <input type="reset" value="Reset" class="btn btn-warning" />
+    </div>
+}
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"
+        integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+        crossorigin="anonymous"></script>
+<script type="text/javascript">
+    var products;
+    $(document).ready(function () {
+        var ddlGroup = $('#ddlGroup');
+        ddlGroup.append($("<option></option>").val('').html('Please Select Group'));
+        $.ajax({
+            url: '/api/groups',
+            type: 'GET',
+            dataType: 'json',
+            success: function (d) {
+                $.each(d, function (i, group) {
+                    if(@Model.ProductGroupId == group.id){
+                    ddlGroup.append($("<option selected></option>").val(group.id).html(group.groupDescription));
+                    //as if productgroup is selected then populate products
+                    PopulateProducts(group.id);
+                    }else{
+                    ddlGroup.append($("<option></option>").val(group.id).html(group.groupDescription));
+                    }
+                });
+            },
+            error: function () {
+                alert('Error!');
+            }
+        });
+
+
+        $("#ddlGroup").change(function () {
+            var groupId = parseInt($(this).val());
+
+            if (!isNaN(groupId)) {
+                PopulateProducts(groupId);
+            }
+        });
+    });
+
+    function PopulateProducts(groupId){
+        var ddlProduct = $('#ddlProduct');
+                ddlProduct.empty();
+                ddlProduct.append($("<option></option>").val('').html('Please wait ...'));
+         $.ajax({
+                    url: '/api/products/' + groupId,
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (d) {
+                        products = d;
+                        ddlProduct.empty(); // Clear the please wait
+                        ddlProduct.append($("<option></option>").val('').html('Select Product'));
+                        $.each(d, function (i, product) {
+                             if(@Model.ProductId == product.id){
+                            ddlProduct.append($("<option selected></option>").val(product.id).html(product.productDescription));
+                            }else{
+                            ddlProduct.append($("<option></option>").val(product.id).html(product.productDescription));
+                            }
+                        });
+                    },
+                    error: function () {
+                        alert('Error!');
+                    }
+                });
+    }
+</script>
